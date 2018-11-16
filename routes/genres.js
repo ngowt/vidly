@@ -22,36 +22,38 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  const genre = genres.find(c => c.id === parseInt(req.params.id));
-  if (!genre) return res.status(404).send('The genre with the given ID was not found.');
-
-  const index = genres.indexOf(genre);
-  genres.splice(index, 1);
-
-  res.send(genre);
+  removeGenre(req, res);
 });
+
+async function removeGenre(req, res) {
+  try {
+    const result = await Genre.findByIdAndRemove(req.params.id);
+    if (!result) { return res.status(404).send('The genre with the given ID was not found.')};
+    return res.status(200).send(`The ${result.name} genre was successfully deleted`);
+  } catch (error) {
+    return res.send(error);
+  }
+}
 
 async function getGenre(req, res) {
   try {
-    // Write logic to get list of genres from database
     const genre = await Genre
       .find({"_id": req.params.id});
     if (!genre) { return res.status(404).send('The genre with the given ID was not found.')};
     return res.status(200).send(genre);
   } catch (error) {
-    return res.status(400).send(error);
+    return res.send(error);
   }
 }
 
 async function getGenres(req, res) {
   try {
-    // Write logic to get list of genres from database
     const genres = await Genre
       .find()
       .sort({name: 1});
     return res.status(200).send(genres);
   } catch (error) {
-    console.log(error);
+    return res.send(error);
   }
 }
 
@@ -71,24 +73,27 @@ async function insertGenre(req, res) {
     await newGenre.save();
     return res.status(200).send(`${req.body.name} has been created as a new genre`);
   } catch (error) {
-    console.log(error);
+    return res.send(error);
   }
 }
 
 async function updateGenre(req, res) {
   try {
-    const genre = await Genre
+    const result = await Genre
       .findById(req.params.id);
 
-    console.log(genre);
-    if (!genre) res.status(404).send('The genre with the given ID was not found.'); 
+    if (!result) { return res.status(404).send('The genre with the given ID was not found.') };
+
+    for (var key in req.body) {
+      result[key] = req.body[key];
+    }
     
-    /*
-    genre.name = req.body.name; 
-    res.send(genre);
-    */
+    await result.save();
+    return res.status(200).send(result);
   } catch (error) {
-    console.log(error);
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).send(error);
+    }
   }
 }
 
