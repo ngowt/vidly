@@ -7,8 +7,16 @@ const customersSchema = new mongoose.Schema({
         minlength: 1,
         maxlength: 20
     },
-    isGold: Boolean,
-    phone: String
+    isGold: {
+        type: Boolean,
+        default: false
+    },
+    phone: {
+        type: String,
+        required: true,
+        minLength: 1,
+        maxlength: 20
+    }
 });
 
 module.exports = customersSchema;
