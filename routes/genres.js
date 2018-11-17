@@ -1,9 +1,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
-const genresSchema = require('../schemas/genres');
-
-const Genre = mongoose.model('genre', genresSchema);
+const Genre = require('../models/genre');
 
 router.get('/:id', (req, res) => {
   getGenre(req, res);
@@ -95,14 +93,6 @@ async function updateGenre(req, res) {
       return res.status(400).send(error);
     }
   }
-}
-
-function validateGenre(genre) {
-  const schema = {
-    name: Joi.string().min(3).required()
-  };
-
-  return Joi.validate(genre, schema);
 }
 
 module.exports = router;
