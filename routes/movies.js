@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const Movie = require('../models/movie');
+const {Genre} = require('../models/genre');
 
 router.get('/:id', (req, res) => {
   getMovie(req, res);
@@ -57,13 +58,17 @@ async function getMovies(req, res) {
 
 async function insertMovie(req, res) {
   try {
+    const genre = await Genre.findById(req.body.genre._id);
+    if (!genre) return res.status(400).send('Invalid genre');
+
     let newMovie = new Movie({
       title: req.body.title,
-      genre: {
-        name: req.body.genre.name
-      },
+      dailyRentalValue: req.body.dailyRentalValue,
       numberInStock: req.body.numberInStock,
-      dailyRentalValue: req.body.dailyRentalValue
+      genre: {
+        _id: genre._id,
+        name: genre.name
+      }
     });
     
     await newMovie.save();
