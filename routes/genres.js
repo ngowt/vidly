@@ -77,7 +77,7 @@ async function insertGenre(req, res) {
 
 async function updateGenre(req, res) {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send(error) };
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid genre') };
     
     const result = await Genre.findById(req.params.id);
     if (!result) { return res.status(404).send('The genre with the given ID was not found.') };
