@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const express = require('express');
+const _ = require('lodash');
 const User = require('../models/user');
 const router = express.Router();
 
@@ -13,9 +14,10 @@ router.post('/', (req, res) => {
 
 async function getUsers(req, res) {
     try {
-        const users = await User
+        let users = await User
             .find()
-            .sort({name: 1});
+            .sort({name: 1})
+            .select({"name": 1, "email": 1});
         return res.status(200).send(users);
     } catch (error) {
         return res.send(error);
@@ -24,17 +26,12 @@ async function getUsers(req, res) {
 
 async function registerUser(req, res) {
   try {
-    const results = await User.findOne({email: req.body.email});
-    if (results) return res.status(409).send('The specified account already exists.');
-    
-    let newUser = new User({
-        name: req.body.name,
-        password: req.body.password,
-        email: req.body.email
-    });
-    await newUser.save();
+    let user = await User.findOne({email: req.body.email});
+    if (user) return res.status(409).send('The specified account already exists.');
+    user = _.pick(req.body, ['name', 'password', 'email']);
+    await user.save();
 
-    return res.status(200).send(newUser);
+    return res.status(200).send(_.pick(user, ['name', 'email']));
   } catch (error) {
     return res.send(error);
   }
