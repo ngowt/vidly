@@ -35,7 +35,7 @@ async function registerUser(req, res) {
     user.password = await bcrypt.hash(user.password, salt);
     user.save();
 
-    return res.status(200).send(_.pick(user, ['name', 'password', 'email']));
+    return res.status(200).send(_.pick(user, ['name', 'email']));
   } catch (error) {
     return res.send(error);
   }
