@@ -26,6 +26,8 @@ router.delete('/:id', (req, res) => {
 
 async function removeMovie(req, res) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid movie') };
+
     const result = await Movie.findByIdAndRemove(req.params.id);
     if (!result) { return res.status(404).send('The movie with the given ID was not found.')};
     return res.status(200).send(result);
@@ -36,9 +38,11 @@ async function removeMovie(req, res) {
 
 async function getMovie(req, res) {
   try {
-    const movie = await Movie
-      .find({"_id": req.params.id});
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid movie') };
+
+    const movie = await Movie.findById(req.params.id);
     if (!movie) { return res.status(404).send('The movie with the given ID was not found.')};
+
     return res.status(200).send(movie);
   } catch (error) {
     return res.send(error);
@@ -58,6 +62,8 @@ async function getMovies(req, res) {
 
 async function insertMovie(req, res) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.body.genre._id)) { return res.status(400).send('Invalid genre') };
+
     const genre = await Genre.findById(req.body.genre._id);
     if (!genre) return res.status(400).send('Invalid genre');
 
@@ -80,9 +86,9 @@ async function insertMovie(req, res) {
 
 async function updateMovie(req, res) {
   try {
-    const result = await Movie
-      .findById(req.params.id);
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid movie') };
 
+    const result = await Movie.findById(req.params.id);
     if (!result) { return res.status(404).send('The movie with the given ID was not found.') };
 
     for (var key in req.body) {
