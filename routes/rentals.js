@@ -22,8 +22,11 @@ router.post('/', (req, res) => {
 
 async function getRental(req, res) {
   try {
-    const rental = await Rental.find({"_id": req.params.id});
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid movie') };
+
+    const rental = await Rental.findById(req.params.id);
     if (!rental) { return res.status(404).send('The rental with the given ID was not found.')};
+
     return res.status(200).send(rental);
   } catch (error) {
     return res.send(error);
@@ -43,6 +46,8 @@ async function getRentals(req, res) {
 
 async function insertRental(req, res) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.body.customer._id)) { return res.status(400).send('Invalid customer') };
+
     const customer = await Customer.findById(req.body.customer._id);
     if (!customer) return res.status(400).send('Customer not found');
     
@@ -72,7 +77,6 @@ async function insertRental(req, res) {
       return res.send(er);
     }
     
-
     return res.status(200).send(newRental);
   } catch (error) {
     return res.send(error);

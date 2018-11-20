@@ -25,8 +25,11 @@ router.delete('/:id', (req, res) => {
 
 async function removeCustomer(req, res) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid customer') };
+
     const result = await Customer.findByIdAndRemove(req.params.id);
     if (!result) { return res.status(404).send('The customer with the given ID was not found.')};
+
     return res.status(200).send(result);
   } catch (error) {
     return res.send(error);
@@ -35,9 +38,11 @@ async function removeCustomer(req, res) {
 
 async function getCustomer(req, res) {
   try {
-    const customer = await Customer
-      .find({"_id": req.params.id});
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid customer') };
+
+    const customer = await Customer.findById(req.params.id);
     if (!customer) { return res.status(404).send('The customer with the given ID was not found.')};
+
     return res.status(200).send(customer);
   } catch (error) {
     return res.send(error);
@@ -72,9 +77,9 @@ async function insertCustomer(req, res) {
 
 async function updateCustomer(req, res) {
   try {
-    const result = await Customer
-      .findById(req.params.id);
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid customer') };
 
+    const result = await Customer.findById(req.params.id);
     if (!result) { return res.status(404).send('The customer with the given ID was not found.') };
 
     for (var key in req.body) {

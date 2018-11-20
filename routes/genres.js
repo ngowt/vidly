@@ -25,6 +25,8 @@ router.delete('/:id', (req, res) => {
 
 async function removeGenre(req, res) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid genre') };
+    
     const result = await Genre.findByIdAndRemove(req.params.id);
     if (!result) { return res.status(404).send('The genre with the given ID was not found.')};
     return res.status(200).send(`The ${result.name} genre was successfully deleted`);
@@ -35,8 +37,9 @@ async function removeGenre(req, res) {
 
 async function getGenre(req, res) {
   try {
-    const genre = await Genre
-      .find({"_id": req.params.id});
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid genre') };
+
+    const genre = await Genre.findById(req.params.id);
     if (!genre) { return res.status(404).send('The genre with the given ID was not found.')};
     return res.status(200).send(genre);
   } catch (error) {
