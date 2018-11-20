@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const express = require('express');
+const _ = require('lodash');
 const router = express.Router();
 const {Genre} = require('../models/genre');
 
@@ -41,6 +42,7 @@ async function getGenre(req, res) {
 
     const genre = await Genre.findById(req.params.id);
     if (!genre) { return res.status(404).send('The genre with the given ID was not found.')};
+
     return res.status(200).send(genre);
   } catch (error) {
     return res.send(error);
@@ -52,6 +54,7 @@ async function getGenres(req, res) {
     const genres = await Genre
       .find()
       .sort({name: 1});
+    
     return res.status(200).send(genres);
   } catch (error) {
     return res.send(error);
@@ -60,19 +63,13 @@ async function getGenres(req, res) {
 
 async function insertGenre(req, res) {
   try {
-    const genre = await Genre
-      .find({"name": req.body.name});
-  
-    if (genre.length > 0) {
-      return res.status(400).send('This genre already exists');
-    }
+    const genre = await Genre.findOne({name: req.body.name});
+    if (genre) { return res.status(400).send('This genre already exists') };
 
-    let newGenre = new Genre({
-      name: req.body.name
-    });
+    let newGenre = new Genre(_.pick(req.body, ['name']));
     
     await newGenre.save();
-    return res.status(200).send(`${req.body.name} has been created as a new genre`);
+    return res.status(200).send(newGenre);
   } catch (error) {
     return res.send(error);
   }

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const express = require('express');
+const _ = require('lodash');
 const router = express.Router();
 const Customer = require('../models/customer');
 
@@ -62,13 +63,9 @@ async function getCustomers(req, res) {
 
 async function insertCustomer(req, res) {
   try {
-    let newCustomer = new Customer({
-      name: req.body.name,
-      isGold: req.body.isGold,
-      phone: req.body.phone
-    });
-    
+    let newCustomer = new Customer(_.pick(req.body, ['name', 'isGold', 'phone']));
     await newCustomer.save();
+    
     return res.status(200).send(newCustomer);
   } catch (error) {
     return res.send(error);
