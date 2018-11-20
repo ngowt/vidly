@@ -24,8 +24,8 @@ async function getUsers(req, res) {
 
 async function registerUser(req, res) {
   try {
-    const results = await User.find({email: req.body.email});
-    if (results.length > 0) return res.status(409).send('The specified account already exists.');
+    const results = await User.findOne({email: req.body.email});
+    if (results) return res.status(409).send('The specified account already exists.');
     
     let newUser = new User({
         name: req.body.name,
