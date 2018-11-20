@@ -11,11 +11,10 @@ const User = mongoose.model('user', mongoose.Schema(
         },
         password: {
             type: String,
-            trim: true,
             required: true,
             minlength: 5,
-            maxlength: 255
-        },
+            maxlength: 1024
+        },  
         email: {
             type: String,
             trim: true,
