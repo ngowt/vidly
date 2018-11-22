@@ -35,7 +35,11 @@ async function registerUser(req, res) {
     user.password = await bcrypt.hash(user.password, salt);
     user.save();
 
-    return res.status(200).send(_.pick(user, ['name', 'email']));
+    const token = user.generateAuthToken();
+    return res
+        .header('x-auth-token', token)    
+        .status(200)
+        .send(_.pick(user, ['_id', 'name', 'email']));
   } catch (error) {
     return res.send(error);
   }
