@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const _ = require('lodash');
 const auth = require('../middleware/auth');
+const admin = require('../middleware/admin');
 const router = express.Router();
 const {Genre} = require('../models/genre');
 
@@ -21,7 +22,7 @@ router.put('/:id', (req, res) => {
   updateGenre(req, res);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', [auth, admin], (req, res) => {
   removeGenre(req, res);
 });
 
@@ -31,7 +32,7 @@ async function removeGenre(req, res) {
     
     const result = await Genre.findByIdAndRemove(req.params.id);
     if (!result) { return res.status(404).send('The genre with the given ID was not found.')};
-    return res.status(200).send(`The ${result.name} genre was successfully deleted`);
+    return res.status(200).send(result);
   } catch (error) {
     return res.send(error);
   }
