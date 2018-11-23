@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const _ = require('lodash');
 const bcrypt = require('bcryptjs');
+const auth = require('../middleware/auth');
 const User = require('../models/user');
 const router = express.Router();
 
@@ -9,9 +10,23 @@ router.get('/', (req, res) => {
     getUsers(req, res);
 });
 
+router.get('/me', auth, (req, res) => {
+    getUser(req, res);
+})
+
 router.post('/', (req, res) => {
     registerUser(req, res);
 });
+
+async function getUser(req, res) {
+    try {
+        const user = await User.findById(req.user._id).select({password: 0});
+        if (!user) return res.status(400).send('Invalid user');
+        return res.status(200).send(user);
+    } catch(error) {
+        res.send(error);
+    }
+}
 
 async function getUsers(req, res) {
     try {
