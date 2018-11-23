@@ -45,7 +45,7 @@ async function registerUser(req, res) {
     let user = await User.findOne({email: req.body.email});
     if (user) return res.status(409).send('The specified account already exists.');
     
-    user = new User(_.pick(req.body, ['name', 'password', 'email']));
+    user = new User(_.pick(req.body, ['name', 'password', 'email', 'isAdmin']));
     let salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(user.password, salt);
     user.save();
@@ -54,7 +54,7 @@ async function registerUser(req, res) {
     return res
         .header('x-auth-token', token)    
         .status(200)
-        .send(_.pick(user, ['_id', 'name', 'email']));
+        .send(_.pick(user, ['_id', 'name', 'email', 'isAdmin']));
   } catch (error) {
     return res.send(error);
   }
