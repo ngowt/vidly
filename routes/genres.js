@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const _ = require('lodash');
+const auth = require('../middleware/auth');
 const router = express.Router();
 const {Genre} = require('../models/genre');
 
@@ -12,7 +13,7 @@ router.get('/', (req, res) => {
   getGenres(req, res);
 });
 
-router.post('/', (req, res) => {
+router.post('/', auth, (req, res) => {
   insertGenre(req, res);
 });
 
