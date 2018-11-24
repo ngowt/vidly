@@ -11,9 +11,9 @@ router.get('/:id', asyncMiddleware(getMovie));
 
 router.get('/', asyncMiddleware(getMovies));
 
-router.post('/', auth, asyncMiddleware(insertMovie, res));
+router.post('/', auth, asyncMiddleware(insertMovie));
 
-router.put('/:id', auth, asyncMiddleware(updateMovie, res));
+router.put('/:id', auth, asyncMiddleware(updateMovie));
 
 router.delete('/:id', [auth, admin], asyncMiddleware(removeMovie, res));
 
