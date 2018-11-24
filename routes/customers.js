@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const express = require('express');
 const _ = require('lodash');
 const router = express.Router();
+const admin = require('../middleware/admin');
+const auth = require('../middleware/auth');
 const Customer = require('../models/customer');
 
 router.get('/:id', (req, res) => {
@@ -16,11 +18,11 @@ router.post('/', (req, res) => {
   insertCustomer(req, res);
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', [auth, admin], (req, res) => {
   updateCustomer(req, res);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', [auth, admin], (req, res) => {
   removeCustomer(req, res);
 });
 

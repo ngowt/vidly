@@ -18,7 +18,7 @@ router.post('/', auth, (req, res) => {
   insertGenre(req, res);
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', auth,(req, res) => {
   updateGenre(req, res);
 });
 

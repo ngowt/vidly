@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const Movie = require('../models/movie');
+const auth = require('../middleware/auth');
+const admin = require('../middleware/admin');
 const {Genre} = require('../models/genre');
 
 router.get('/:id', (req, res) => {
@@ -12,15 +14,15 @@ router.get('/', (req, res) => {
   getMovies(req, res);
 });
 
-router.post('/', (req, res) => {
+router.post('/', auth, (req, res) => {
   insertMovie(req, res);
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', auth, (req, res) => {
   updateMovie(req, res);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', [auth, admin], (req, res) => {
   removeMovie(req, res);
 });
 

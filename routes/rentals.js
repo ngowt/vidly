@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
   getRentals(req, res);
 });
 
-router.post('/', (req, res) => {
+router.post('/', auth, (req, res) => {
   insertRental(req, res);
 });
 
