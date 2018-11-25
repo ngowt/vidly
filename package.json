@@ -15,10 +15,11 @@
     "express": "^4.16.2",
     "fawn": "^2.1.5",
     "joi": "^13.1.0",
+    "joi-objectid": "^2.0.0",
     "jsonwebtoken": "^8.4.0",
     "lodash": "^4.17.11",
     "mongoose": "^5.3.12",
-    "winston": "^3.1.0",
+    "winston": "^2.4.0",
     "winston-mongodb": "^3.0.0"
   }
 }
