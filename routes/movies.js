@@ -15,7 +15,7 @@ router.post('/', auth, asyncMiddleware(insertMovie));
 
 router.put('/:id', auth, asyncMiddleware(updateMovie));
 
-router.delete('/:id', [auth, admin], asyncMiddleware(removeMovie, res));
+router.delete('/:id', [auth, admin], asyncMiddleware(removeMovie));
 
 async function removeMovie(req, res) {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid movie') };
