@@ -11,6 +11,11 @@ const users = require('./routes/users');
 const auth = require('./routes/auth');
 const error = require('./middleware/error');
 
+process.on('uncaughtException', (ex) => {
+    console.log('WE GOT AN UNCAUGHT EXCEPTION');
+    winston.error(ex.message, ex);
+});
+
 winston.add(winston.transports.File, { filename: "logfile.log" });
 winston.add(winston.transports.MongoDB, { 
     db: "mongodb://localhost/vidly",
