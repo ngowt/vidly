@@ -11,9 +11,17 @@ const users = require('./routes/users');
 const auth = require('./routes/auth');
 const error = require('./middleware/error');
 
+winston.handleExceptions(
+    new winston.transports.File({ filename: 'uncaughtExceptions.log'}));
+
 process.on('uncaughtException', (ex) => {
-    console.log('WE GOT AN UNCAUGHT EXCEPTION');
     winston.error(ex.message, ex);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (ex) => {
+    winston.error(ex.message, ex);
+    process.exit(1);
 });
 
 winston.add(winston.transports.File, { filename: "logfile.log" });
