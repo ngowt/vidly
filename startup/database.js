@@ -1,11 +1,9 @@
 const winston = require('winston');
 const mongoose = require('mongoose');
-const dbName = `vidly`;
-const domain = `localhost`;
-const port = `27017`;
-const connectionString = `mongodb://${domain}:${port}/${dbName}`;
+const config = require('config');
 
 module.exports = function() {
-    mongoose.connect(`${connectionString}`, {useNewUrlParser: true})
-    .then( () => winston.info(`Connected to ${dbName} database...`));
+    const db = config.get('db');
+    mongoose.connect(db)
+    .then( () => winston.info(`Connected to ${db} database...`));
 }
