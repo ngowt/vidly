@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const asyncMiddleware = require('../middleware/async');
 const router = express.Router();
-const {Genre} = require('../models/genre');
+const { Genre, validateGenre } = require('../models/genre');
 
 router.get('/:id', validateObjectId, asyncMiddleware(getGenre));
 
@@ -38,6 +38,8 @@ async function getGenres(req, res) {
 }
 
 async function insertGenre(req, res, next) {
+  const { error } = validateGenre(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
   const genre = await Genre.findOne({name: req.body.name});
   if (genre) return res.status(400).send('This genre already exists');
   let newGenre = new Genre(_.pick(req.body, ['name']));
