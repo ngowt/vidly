@@ -1,10 +1,11 @@
 const request = require('supertest');
 const {Genre} = require('../../models/genre');
 const User = require('../../models/user');
+const mongoose = require('mongoose');
 
 describe('/api/genres', () => {
     beforeEach( () => { server = require('../../index'); });
-    afterEach(async () => { 
+    afterEach( async () => { 
         server.close();
         await Genre.remove({});
     });
@@ -36,6 +37,12 @@ describe('/api/genres', () => {
         it('should throw a 400 error with an invalid objectid', async () => {
             const res = await request(server).get(`/api/genres/1111`);
             expect(res.status).toBe(400);
+        });
+
+        it('should throw a 404 error if no genre with the given id is found', async () => {
+            const objectId = mongoose.Types.ObjectId();
+            const res = await request(server).get(`/api/genres/${objectId}`);
+            expect(res.status).toBe(404);
         });
     });
 
