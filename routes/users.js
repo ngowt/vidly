@@ -3,8 +3,8 @@ const express = require('express');
 const _ = require('lodash');
 const bcrypt = require('bcryptjs');
 const auth = require('../middleware/auth');
-const User = require('../models/user');
 const asyncMiddleware = require('../middleware/async');
+const User = require('../models/user');
 const router = express.Router();
 
 router.get('/', asyncMiddleware(getUsers));
