@@ -48,13 +48,8 @@ describe('/api/genres', () => {
 
     describe('PUT /:id', () => {
         beforeEach( () => { 
-            server = require('../../index'); 
             token = new User().generateAuthToken();
             newGenreName = 'romance';
-        });
-        afterEach( async () => { 
-            server.close();
-            await Genre.remove({});
         });
 
         let token;
@@ -158,14 +153,6 @@ describe('/api/genres', () => {
     });
 
     describe('DELETE /', () => {
-        beforeEach( () => { 
-            server = require('../../index'); 
-        });
-        afterEach( async () => { 
-            server.close();
-            await Genre.remove({});
-        });
-
         let token;
         let objectId;
 
