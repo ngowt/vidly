@@ -49,6 +49,8 @@ describe('/api/genres', () => {
     describe('PUT /:id', () => {
         beforeEach( () => { 
             server = require('../../index'); 
+            token = new User().generateAuthToken();
+            newGenreName = 'romance';
         });
         afterEach( async () => { 
             server.close();
@@ -71,9 +73,7 @@ describe('/api/genres', () => {
             const genre = new Genre({
                 _id: mongoose.Types.ObjectId(),
                 name: 'horror'
-            });
-            token = new User().generateAuthToken();
-            newGenreName = 'romance';
+            });     
             objectId = genre._id;
             await Genre.collection.insert(genre);
             const res = await exec();
@@ -84,8 +84,6 @@ describe('/api/genres', () => {
         });
 
         it('should return 404 when updating a nonexistent genre', async () => {
-            token = new User().generateAuthToken();
-            newGenreName = 'romance';
             objectId = mongoose.Types.ObjectId();
             const res = await exec();
             
