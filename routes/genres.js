@@ -1,31 +1,30 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const _ = require('lodash');
+const validateObjectId = require('../middleware/validateObjectId');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const asyncMiddleware = require('../middleware/async');
 const router = express.Router();
 const {Genre} = require('../models/genre');
 
-router.get('/:id', asyncMiddleware(getGenre));
+router.get('/:id', validateObjectId, asyncMiddleware(getGenre));
 
 router.get('/', asyncMiddleware(getGenres));
 
 router.post('/', auth, asyncMiddleware(insertGenre));
 
-router.put('/:id', auth, asyncMiddleware(updateGenre));
+router.put('/:id', [auth, validateObjectId], asyncMiddleware(updateGenre));
 
-router.delete('/:id', [auth, admin], asyncMiddleware(removeGenre));
+router.delete('/:id', [auth, admin, validateObjectId], asyncMiddleware(removeGenre));
 
 async function removeGenre(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send('Invalid genre');
   const result = await Genre.findByIdAndRemove(req.params.id);
   if (!result) { return res.status(404).send('The genre with the given ID was not found.')};
   return res.status(200).send(result);
 }
 
 async function getGenre(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send('Invalid genre');
   const genre = await Genre.findById(req.params.id);
   if (!genre) { return res.status(404).send('The genre with the given ID was not found.')};
   return res.status(200).send(genre);
@@ -47,7 +46,6 @@ async function insertGenre(req, res, next) {
 }
 
 async function updateGenre(req, res, next) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send('Invalid genre');
   const result = await Genre.findById(req.params.id);
   if (!result) { return res.status(404).send('The genre with the given ID was not found.') };
   for (var key in req.body) {

@@ -5,27 +5,26 @@ const Movie = require('../models/movie');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const asyncMiddleware = require('../middleware/async');
+const validateObjectId = require('../middleware/validateObjectId');
 const {Genre} = require('../models/genre');
 
-router.get('/:id', asyncMiddleware(getMovie));
+router.get('/:id', validateObjectId, asyncMiddleware(getMovie));
 
 router.get('/', asyncMiddleware(getMovies));
 
 router.post('/', auth, asyncMiddleware(insertMovie));
 
-router.put('/:id', auth, asyncMiddleware(updateMovie));
+router.put('/:id', auth, validateObjectId, asyncMiddleware(updateMovie));
 
-router.delete('/:id', [auth, admin], asyncMiddleware(removeMovie));
+router.delete('/:id', [auth, admin, validateObjectId], asyncMiddleware(removeMovie));
 
 async function removeMovie(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid movie') };
   const result = await Movie.findByIdAndRemove(req.params.id);
   if (!result) { return res.status(404).send('The movie with the given ID was not found.')};
   return res.status(200).send(result);
 }
 
 async function getMovie(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid movie') };
   const movie = await Movie.findById(req.params.id);
   if (!movie) { return res.status(404).send('The movie with the given ID was not found.')};
   return res.status(200).send(movie);
@@ -39,7 +38,7 @@ async function getMovies(req, res) {
 }
 
 async function insertMovie(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.body.genre._id)) { return res.status(400).send('Invalid genre') };
+  if (!mongoose.Types.ObjectId.isValid(req.body.genre._id)) return res.status(400).send('Invalid genre') ;
   const genre = await Genre.findById(req.body.genre._id);
   if (!genre) return res.status(400).send('Invalid genre');
   let newMovie = new Movie({
@@ -56,7 +55,6 @@ async function insertMovie(req, res) {
 }
 
 async function updateMovie(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid movie') };
   const result = await Movie.findById(req.params.id);
   if (!result) { return res.status(404).send('The movie with the given ID was not found.') };
   for (var key in req.body) {

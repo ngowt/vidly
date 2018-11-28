@@ -5,27 +5,26 @@ const router = express.Router();
 const admin = require('../middleware/admin');
 const auth = require('../middleware/auth');
 const asyncMiddleware = require('../middleware/async');
+const validateObjectId = require('../middleware/validateObjectId');
 const Customer = require('../models/customer');
 
-router.get('/:id', asyncMiddleware(getCustomer));
+router.get('/:id', validateObjectId, asyncMiddleware(getCustomer));
 
 router.get('/', asyncMiddleware(getCustomers));
 
 router.post('/', asyncMiddleware(insertCustomer));
 
-router.put('/:id', [auth, admin], asyncMiddleware(updateCustomer));
+router.put('/:id', [auth, admin, validateObjectId], asyncMiddleware(updateCustomer));
 
-router.delete('/:id', [auth, admin], asyncMiddleware(removeCustomer));
+router.delete('/:id', [auth, admin, validateObjectId], asyncMiddleware(removeCustomer));
 
 async function removeCustomer(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid customer') };
   const result = await Customer.findByIdAndRemove(req.params.id);
   if (!result) { return res.status(404).send('The customer with the given ID was not found.')};
   return res.status(200).send(result);
 }
 
 async function getCustomer(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid customer') };
   const customer = await Customer.findById(req.params.id);
   if (!customer) { return res.status(404).send('The customer with the given ID was not found.')};
   return res.status(200).send(customer);
@@ -45,7 +44,6 @@ async function insertCustomer(req, res) {
 }
 
 async function updateCustomer(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid customer') };
   const result = await Customer.findById(req.params.id);
   if (!result) { return res.status(404).send('The customer with the given ID was not found.') };
   for (var key in req.body) {

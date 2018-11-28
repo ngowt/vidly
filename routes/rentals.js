@@ -6,18 +6,18 @@ const Movie = require('../models/movie');
 const Rental = require('../models/rental');
 const auth = require('../middleware/auth');
 const asyncMiddleware = require('../middleware/async');
+const validateObjectId = require('../middleware/validateObjectId');
 const router = express.Router();
 
 Fawn.init(mongoose);
 
-router.get('/:id', asyncMiddleware(getRental));
+router.get('/:id', validateObjectId, asyncMiddleware(getRental));
 
 router.get('/', asyncMiddleware(getRentals));
 
 router.post('/', auth, asyncMiddleware(insertRental));
 
 async function getRental(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) { return res.status(400).send('Invalid movie') };
   const rental = await Rental.findById(req.params.id);
   if (!rental) { return res.status(404).send('The rental with the given ID was not found.')};
   return res.status(200).send(rental);
@@ -31,7 +31,7 @@ async function getRentals(req, res) {
 }
 
 async function insertRental(req, res) {
-  if (!mongoose.Types.ObjectId.isValid(req.body.customer._id)) { return res.status(400).send('Invalid customer') };
+  if (!mongoose.Types.ObjectId.isValid(req.body.customer._id)) return res.status(400).send('Invalid customer');
   const customer = await Customer.findById(req.body.customer._id);
   if (!customer) return res.status(400).send('Customer not found');
   const movie = await Movie.findById(req.body.movie._id);
