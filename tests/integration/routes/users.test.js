@@ -1,6 +1,7 @@
 const User = require('../../../models/user');
 const bcrypt = require('bcryptjs');
 const request = require('supertest');
+const mongoose = require('mongoose');
 
 
 describe('/api/users', () => {
@@ -8,6 +9,68 @@ describe('/api/users', () => {
     afterEach( async () => { 
         server.close();
         await User.remove({});
+    });
+
+    describe('GET /me', () => {        
+        let token;
+
+        const exec = async () => {
+            const res = await request(server)
+                .get(`/api/users/me`)
+                .set('x-auth-token', token)
+                .send();
+            return res;
+        };
+        
+        it('should return 200 with valid JWT', async () => {
+            let salt = await bcrypt.genSalt(10);
+            const user = new User({
+                name: 'John Smith',
+                password: await bcrypt.hash('a123456#', salt),
+                email: 'johnsmith@gmail.com',
+                isAdmin: true
+            });
+            token = user.generateAuthToken();
+            await User.collection.insertOne(user);
+            const res = await exec();
+            expect(res.status).toBe(200);
+        });
+        
+        it('should return the user with name, email, and isAdmin properties', async () => {
+            let salt = await bcrypt.genSalt(10);
+            const user = new User({
+                name: 'John Smith',
+                password: await bcrypt.hash('a123456#', salt),
+                email: 'johnsmith@gmail.com',
+                isAdmin: true
+            });
+            token = user.generateAuthToken();
+            await User.collection.insertOne(user);
+            const res = await exec();
+            expect(res.body).toHaveProperty('_id', user._id.toHexString());
+            expect(res.body).toHaveProperty('email', user.email);
+            expect(res.body).toHaveProperty('isAdmin', user.isAdmin);
+        });
+
+        it('should return the user without the password property', async () => {
+            let salt = await bcrypt.genSalt(10);
+            const user = new User({
+                name: 'John Smith',
+                password: await bcrypt.hash('a123456#', salt),
+                email: 'johnsmith@gmail.com',
+                isAdmin: true
+            });
+            token = user.generateAuthToken();
+            await User.collection.insertOne(user);
+            const res = await exec();
+            expect(res.body).not.toHaveProperty('password');
+        });
+
+        it('should return 400 when invalid token is passed', async () => {
+            token = new User().generateAuthToken();
+            const res = await exec();
+            expect(res.status).toBe(400);
+        });
     });
 
     describe('GET /', () => {
