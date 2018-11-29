@@ -84,6 +84,54 @@ describe('/api/customers', () => {
         });
     });
     
+    describe('POST /', () => {
+        beforeEach( () => {
+
+        });
+
+        let name;
+        let isGold;
+        let phone;
+
+        const exec = async () => {
+            const res = await request(server)
+                .post('/api/customers')
+                .send({ 
+                    name: name,
+                    isGold: isGold,
+                    phone: phone
+                });
+            return res;
+        };
+
+        it('should return 200 when inserting a customer', async () => {
+            name = 'John Smith';
+            isGold = false,
+            phone = '9051234567';
+            const res = await exec();
+            expect(res.status).toBe(200);
+        });
+
+        it('should return the new customer', async () => {
+            name = 'John Smith';
+            isGold = false,
+            phone = '9051234567';
+            const res = await exec();
+            expect(res.body).toHaveProperty('name', name);
+            expect(res.body).toHaveProperty('isGold', isGold);
+            expect(res.body).toHaveProperty('phone', phone);
+        });
+
+        it('should save the customer if valid', async () => {
+            name = 'John Smith'
+            isGold = false,
+            phone = '9051234567';
+            const res = await exec();
+            const customer = Customer.find({ name: name});
+            expect(customer).not.toBeNull();
+        });
+    }); 
+
     describe('DELETE /', () => {
         let token;
         let id;
@@ -126,6 +174,8 @@ describe('/api/customers', () => {
         });
     });
 
+    
+
     /*
     describe('PUT /:id', () => {
         beforeEach( () => { 
@@ -165,72 +215,6 @@ describe('/api/customers', () => {
             
             expect(res.status).toBe(404);
         });
-    });
-
-    describe('POST /', () => {
-        beforeEach( () => {
-            token = new User().generateAuthToken();
-            genreName = 'fiction';
-        });
-
-        // Define the happy path, and then in each test, we change 
-        // one parameter that clearly aligns with the name of the test
-        
-        let token;
-        let genreName;
-
-        const exec = async () => {
-            const res = await request(server)
-                .post('/api/genres')
-                .set('x-auth-token', token)
-                .send({ name: genreName });
-            return res;
-        };
-        
-        it('should return 401 if client is not logged in', async () => {
-            token = '';
-            const res = await exec();
-            expect(res.status).toBe(401);
-        });
-
-        it('should return 400 if genre is < 3 characters', async () => {
-            genreName = 'aa';
-            const res = await exec();
-            expect (res.status).toBe(400);
-        });
-
-        it('should return 400 if genre is > 20 characters', async () => {
-            genreName = new Array(22).join('a');
-            const res = await exec();
-            expect(res.status).toBe(400);
-        });
-
-        it('should return 400 if genre already exists', async () => {
-            const genre = new Genre({
-                name: 'horror'
-            });
-            token = new User().generateAuthToken();
-            await Genre.collection.insert(genre);
-            genreName = genre.name;
-            const res = await exec();
-
-            expect(res.status).toBe(400);
-        });
-
-        it('should save the genre if valid', async () => {
-            genreName = 'fiction'
-            const res = await exec();
-            const genre = Genre.find({ name: genreName});
-            expect(genre).not.toBeNull();
-            expect(res.status).toBe(200);
-        });
-
-        it('should return the genre if valid', async () => {
-            genreName = 'fiction';
-            const res = await exec();
-            expect(res.body).toHaveProperty('_id');
-            expect(res.body).toHaveProperty('name', genreName);
-        });
-    });    
+    });   
     */
 });
