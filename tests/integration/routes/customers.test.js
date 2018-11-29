@@ -11,39 +11,32 @@ describe('/api/customers', () => {
     });
     
     describe('GET /', () => {
+        let customers;
+        beforeEach( async () => {
+            customers = [{
+                name: 'John Smith',
+                isGold: false, 
+                phone: '9051234567'
+            },
+            {
+                name: 'Jane Doe', 
+                isGold: true,
+                phone: '6479876543'
+            }];
+            await Customer.collection.insertMany(customers);
+        });
+        
         const exec = async () => {
             const res = await request(server).get(`/api/customers/`)
             return res;
         };
 
         it('should return 200 with all customers', async () => {
-            const customers = [{
-                name: 'John Smith',
-                isGold: false, 
-                phone: '9051234567'
-            },
-            {
-                name: 'Jane Doe', 
-                isGold: true,
-                phone: '6479876543'
-            }];
-            await Customer.collection.insertMany(customers);
             const res = await exec();
             expect(res.status).toBe(200);
         });
 
         it('should return customers with name, isGold, and phone properties', async () => {
-            const customers = [{
-                name: 'John Smith',
-                isGold: false, 
-                phone: '9051234567'
-            },
-            {
-                name: 'Jane Doe', 
-                isGold: true,
-                phone: '6479876543'
-            }];
-            await Customer.collection.insertMany(customers);
             const res = await exec();
             expect(res.body[0]).toHaveProperty('name');
             expect(res.body[0]).toHaveProperty('isGold');
@@ -86,7 +79,9 @@ describe('/api/customers', () => {
     
     describe('POST /', () => {
         beforeEach( () => {
-
+            name = 'John Smith';
+            isGold = false,
+            phone = '9051234567';
         });
 
         let name;
@@ -104,18 +99,12 @@ describe('/api/customers', () => {
             return res;
         };
 
-        it('should return 200 when inserting a customer', async () => {
-            name = 'John Smith';
-            isGold = false,
-            phone = '9051234567';
+        it('should return 200 when inserting a customer', async () => {  
             const res = await exec();
             expect(res.status).toBe(200);
         });
 
         it('should return the new customer', async () => {
-            name = 'John Smith';
-            isGold = false,
-            phone = '9051234567';
             const res = await exec();
             expect(res.body).toHaveProperty('name', name);
             expect(res.body).toHaveProperty('isGold', isGold);
@@ -123,14 +112,73 @@ describe('/api/customers', () => {
         });
 
         it('should save the customer if valid', async () => {
-            name = 'John Smith'
-            isGold = false,
-            phone = '9051234567';
-            const res = await exec();
+            await exec();
             const customer = Customer.find({ name: name});
             expect(customer).not.toBeNull();
         });
     }); 
+
+    describe('PUT /:id', () => {
+        beforeEach( () => { 
+            const user = {
+                isAdmin: true
+            };
+            name = 'Joseph Smith';
+            isGold = true;
+            phone = '1234567890';
+            token = new User(user).generateAuthToken();
+        });
+
+        let name;
+        let isGold;
+        let phone;
+        let token;
+
+        const exec = async () => {
+            const res = await request(server)
+                .put(`/api/customers/${id}`)
+                .set('x-auth-token', token)
+                .send({ 
+                    name: name,
+                    isGold: isGold,
+                    phone: phone 
+                });
+            return res;
+        };
+
+        it('should return 200 when updating a customer', async () => {
+            const customer = {
+                name: 'John Smith',
+                isGold: false, 
+                phone: '9051234567'
+            };
+            
+            await Customer.collection.insert(customer);
+            id = customer._id;
+            const res = await exec();
+            expect(res.status).toBe(200);
+        });
+
+        it('should update the properties of the customer', async () => {
+            const customer = {
+                name: 'John Smith',
+                isGold: false, 
+                phone: '9051234567'
+            };
+            await Customer.collection.insert(customer);
+            id = customer._id;
+            const res = await exec();
+            expect(res.body).toHaveProperty('name', name);
+            expect(res.body).toHaveProperty('isGold', isGold);
+            expect(res.body).toHaveProperty('phone', phone);
+        });
+
+        it('should return 404 when updating a nonexistent customer', async () => {
+            id = mongoose.Types.ObjectId();
+            const res = await exec();
+            expect(res.status).toBe(404);
+        });
+    });
 
     describe('DELETE /', () => {
         let token;
@@ -173,48 +221,4 @@ describe('/api/customers', () => {
             expect(res.status).toBe(404);
         });
     });
-
-    
-
-    /*
-    describe('PUT /:id', () => {
-        beforeEach( () => { 
-            token = new User().generateAuthToken();
-            newGenreName = 'romance';
-        });
-
-        let token;
-        let objectId;
-        let newGenreName;
-
-        const exec = async () => {
-            const res = await request(server)
-                .put(`/api/genres/${objectId}`)
-                .set('x-auth-token', token)
-                .send({ name: newGenreName });
-            return res;
-        };
-
-        it('should return 200 when updating a genre', async () => {
-            const genre = new Genre({
-                _id: mongoose.Types.ObjectId(),
-                name: 'horror'
-            });     
-            objectId = genre._id;
-            await Genre.collection.insert(genre);
-            const res = await exec();
-            
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('_id', genre._id.toHexString());
-            expect(res.body).toHaveProperty('name', newGenreName);
-        });
-
-        it('should return 404 when updating a nonexistent genre', async () => {
-            objectId = mongoose.Types.ObjectId();
-            const res = await exec();
-            
-            expect(res.status).toBe(404);
-        });
-    });   
-    */
 });
