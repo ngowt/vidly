@@ -23,7 +23,7 @@ async function getUsers(req, res) {
     let users = await User
         .find()
         .sort({name: 1})
-        .select({"name": 1, "email": 1});
+        .select({password: 0});
     return res.status(200).send(users);
 }
 
