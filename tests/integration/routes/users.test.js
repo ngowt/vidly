@@ -11,6 +11,63 @@ describe('/api/users', () => {
         await User.remove({});
     });
 
+    describe('POST /', () => {
+        const exec = async () => {
+            const res = await request(server)
+                .post(`/api/users/`)
+                .send({
+                    name: name,
+                    password: password,
+                    email: email,
+                    isAdmin: isAdmin
+                });
+            return res;
+        };
+
+        let name = 'Test user';
+        let password = 'a1234567890#';
+        let email = 'testuser@gmail.com';
+        let isAdmin = true;    
+
+        it('should return 200 if registered successfully', async () => {
+            const res = await exec();
+            expect(res.status).toBe(200);
+        })
+
+        it('should save the user if registered successfully', async () => {
+            await exec();
+            const user = User.find({ email: email});
+            expect(user).not.toBeNull();
+        });
+
+        it('should return the user with _id, name, email, and isAdmin properties', async () => {
+            const res = await exec();
+            expect(res.body).toHaveProperty('_id');
+            expect(res.body).toHaveProperty('name', name);
+            expect(res.body).toHaveProperty('email', email);
+            expect(res.body).toHaveProperty('isAdmin', isAdmin);
+        });
+
+        it('should return the user without the password properties', async () => {
+            const res = await exec();
+            expect(res.body).not.toHaveProperty('password');
+        });
+
+        it('should return 409 for an account that already exists', async () => {
+            let salt = await bcrypt.genSalt(10);
+            const user = new User({
+                name: 'John Smith',
+                password: await bcrypt.hash('a123456#', salt),
+                email: 'johnsmith@gmail.com',
+                isAdmin: true
+            });
+            await User.collection.insert(user);
+            email = user.email;
+            const res = await exec();
+            expect(res.status).toBe(409);
+        })
+    });
+
     describe('GET /me', () => {        
         let token;
 
