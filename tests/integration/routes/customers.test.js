@@ -8,6 +8,7 @@ describe('/api/customers', () => {
     afterEach( async () => { 
         server.close();
         await Customer.remove({});
+        await User.remove({});
     });
     
     describe('GET /', () => {
