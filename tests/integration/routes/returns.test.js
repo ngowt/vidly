@@ -56,8 +56,8 @@ describe('/api/returns', () => {
         });
 
         it('should return 200 if valid customerId and movieId passed', async () => {
-            customerId = '1234';
-            movieId = '1234';
+            customerId = rental.customer._id;
+            movieId = rental.movie._id;
             const res = await exec();
             expect(res.status).toBe(200);
         });
@@ -75,5 +75,13 @@ describe('/api/returns', () => {
             const res = await exec(); 
             expect(res.status).toBe(400);
         });
+
+        it('should return 404 if customer and rental does not exist', async () => {
+            customerId = new mongoose.Types.ObjectId();
+            movieId = new mongoose.Types.ObjectId();
+            const res = await exec();
+            expect(res.status).toBe(404);
+        });
+
     });
 });
