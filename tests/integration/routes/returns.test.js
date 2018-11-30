@@ -1,6 +1,7 @@
 const Rental = require('../../../models/rental');
 const request = require('supertest');
 const mongoose = require('mongoose');
+const User = require('../../../models/user');
 
 
 describe('/api/returns', () => {
@@ -8,13 +9,13 @@ describe('/api/returns', () => {
         server = require('../../../index');
     });
     afterEach( async () => { 
-        server.close();
         await Rental.remove({});
+        await server.close();
     });
 
     describe('POST /', () => {
-        it('should return the rental after passing a valid customerid and movieid', async () => {
-            const rental = new Rental({
+        beforeEach( async () => {
+            rental = new Rental({
                 customer: {
                     _id: mongoose.Types.ObjectId(),
                     name: "John Smith",
@@ -31,8 +32,48 @@ describe('/api/returns', () => {
                 }
             });
             await rental.save();
+            customerId = rental.customer._id;
+            movieId = rental.movie._id;
+        });
+
+        let rental;
+        let customerId;
+        let movieId;
+        
+        const exec = async() => {
+            const res = request(server).post(`/api/returns/`)
+                .set('x-auth-token', new User().generateAuthToken())
+                .send({ 
+                    customerId: customerId, 
+                    movieId: movieId
+                });
+            return res;
+        }
+
+        it('should return the rental after passing a valid customerid and movieid', async () => {
             const res = await Rental.findById(rental._id);       
             expect(res).not.toBeNull();
+        });
+
+        it('should return 200 if valid customerId and movieId passed', async () => {
+            customerId = '1234';
+            movieId = '1234';
+            const res = await exec();
+            expect(res.status).toBe(200);
+        });
+
+        it('should return 400 if customerid is not passed', async () => {
+            customerId = '';
+            movieId = '1234';
+            const res = await exec();
+            expect(res.status).toBe(400);
+        });
+
+        it('should return 400 if movieId is not passed', async () => {
+            customerId = '1234';
+            movieId = '';
+            const res = await exec(); 
+            expect(res.status).toBe(400);
         });
     });
 });
