@@ -6,9 +6,9 @@ const User = require('../../../models/user');
 describe('/api/customers', () => {
     beforeEach( () => { server = require('../../../index'); });
     afterEach( async () => { 
-        server.close();
         await Customer.remove({});
         await User.remove({});
+        await server.close();
     });
     
     describe('GET /', () => {

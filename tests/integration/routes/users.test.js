@@ -7,8 +7,8 @@ const mongoose = require('mongoose');
 describe('/api/users', () => {
     beforeEach( () => { server = require('../../../index'); });
     afterEach( async () => { 
-        server.close();
         await User.remove({});
+        await server.close();
     });
 
     describe('POST /', () => {

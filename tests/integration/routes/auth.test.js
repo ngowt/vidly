@@ -5,8 +5,9 @@ const User = require('../../../models/user');
 describe('/api/auth', () => {
     beforeEach( () => { server = require('../../../index'); });
     afterEach( async () => { 
-        server.close();
+        
         await User.remove({});
+        await server.close();
     });
     
     describe('POST /', () => {
