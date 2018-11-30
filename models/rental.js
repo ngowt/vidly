@@ -37,7 +37,8 @@ const Rental = mongoose.model('rental', mongoose.Schema(
                     min: 0,
                     max: 255
                 }
-            })
+            }),
+            required: true
         },
         dateOut: {
             type: Date,
