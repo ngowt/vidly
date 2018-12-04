@@ -15,6 +15,7 @@ async function insertReturn(req, res) {
         'movie._id': req.body.movieId
     });
     if (!result) return res.status(404).send('Rental does not exist');
+    if (result.dateReturned || result.rentalFee) return res.status(400).send('Rental has already been processed');
     result.dateReturned = Date.now();
     result.rentalFee = Math.floor((result.dateReturned - result.dateOut) / (1000 * 60 * 24));
     await result.save();
