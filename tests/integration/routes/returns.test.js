@@ -76,6 +76,32 @@ describe('/api/returns', () => {
             expect(res.status).toBe(400);
         });
 
+        it('should return 400 if return is already processed', async () => {
+            rental = new Rental({
+                customer: {
+                    _id: mongoose.Types.ObjectId(),
+                    name: "John Smith",
+                    phone: "9051234567"
+                },
+                movie: {
+                    _id: mongoose.Types.ObjectId(),
+                    title: "Movie title 2",
+                    genre: {
+                        name: "Genre name"
+                    },
+                    numberInStock: 2,
+                    dailyRentalValue: 5
+                },
+                dateReturned: Date.now(),
+                rentalFee: 1.23,
+            });
+            await rental.save();
+            customerId = rental.customer._id;
+            movieId = rental.movie._id;
+            const res = await exec(); 
+            expect(res.status).toBe(400);
+        });
+
         it('should return 404 if customer and rental does not exist', async () => {
             customerId = new mongoose.Types.ObjectId();
             movieId = new mongoose.Types.ObjectId();
