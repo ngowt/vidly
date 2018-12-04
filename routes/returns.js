@@ -15,10 +15,10 @@ async function insertReturn(req, res) {
         'movie._id': req.body.movieId
     });
     if (!result) return res.status(404).send('Rental does not exist');
-    return res.status(200).send({
-        customerId: req.body.customerId,
-        movieId: req.body.movieId
-    });
+    result.dateReturned = Date.now();
+    result.rentalFee = Math.floor((result.dateReturned - result.dateOut) / (1000 * 60 * 24));
+    await result.save();
+    return res.status(200).send(result);
 }
 
 module.exports = router;
