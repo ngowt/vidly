@@ -3,6 +3,7 @@ const express = require('express');
 const asyncMiddleware = require('../middleware/async');
 const auth = require('../middleware/auth');
 const Rental = require('../models/rental');
+const Movie = require('../models/movie');
 const router = express.Router();
 
 router.post('/', auth, asyncMiddleware(insertReturn));
@@ -19,6 +20,11 @@ async function insertReturn(req, res) {
     result.dateReturned = Date.now();
     result.rentalFee = new Date(result.dateReturned - result.dateOut).getDate() * result.movie.dailyRentalValue;
     await result.save();
+
+    await Movie.updateOne({ _id: result.movie._id }, {
+        $inc: { numberInStock: 1 }
+    });
+    
     return res.status(200).send(result);
 }
 
