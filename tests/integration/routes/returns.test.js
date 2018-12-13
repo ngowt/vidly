@@ -45,8 +45,6 @@ describe('/api/returns', () => {
             });
             await rental.save();
             await movie.save();
-            
-            
         });
 
         let rental;
@@ -70,8 +68,6 @@ describe('/api/returns', () => {
         });
 
         it('should set the returnDate if input is valid', async () => {
-            customerId = rental.customer._id;
-            movieId = rental.movie._id;
             const res = await exec();
             const rentalInDb = await Rental.findById(rental._id);
             const diff = new Date() - rentalInDb.dateReturned;
@@ -79,8 +75,6 @@ describe('/api/returns', () => {
         });
 
         it('should update the movie stock return is successful', async () => {
-            customerId = rental.customer._id;
-            movieId = rental.movie._id;
             const res = await exec();
             const movieInDb = await Movie.findById(movieId);
             expect(movieInDb.numberInStock).toBe(movie.numberInStock + 1);
@@ -112,9 +106,13 @@ describe('/api/returns', () => {
             expect(res.body.rentalFee).toBe(14);
         });
 
+        it('should return a response containing the list of properties in rental object', async () => {
+            const res = await exec();
+            let rentalProperties = ['customer', 'movie', 'dateOut', 'dateReturned', 'rentalFee'];
+            expect(Object.keys(res.body)).toEqual(expect.arrayContaining(rentalProperties));
+        });
+
         it('should return 200 if valid customerId and movieId passed', async () => {
-            customerId = rental.customer._id;
-            movieId = rental.movie._id;
             const res = await exec();
             expect(res.status).toBe(200);
         });
