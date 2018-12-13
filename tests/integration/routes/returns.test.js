@@ -1,8 +1,7 @@
-const Rental = require('../../../models/rental');
 const request = require('supertest');
 const mongoose = require('mongoose');
 const User = require('../../../models/user');
-
+const Rental = require('../../../models/rental');
 
 describe('/api/returns', () => {
     beforeEach( () => { 
@@ -62,6 +61,33 @@ describe('/api/returns', () => {
             const rentalInDb = await Rental.findById(rental._id);
             const diff = new Date() - rentalInDb.dateReturned;
             expect(diff).toBeLessThan(10 * 1000);
+        });
+
+        it('should set the rental fee if input is valid', async () => {
+            rental = new Rental({
+                customer: {
+                    _id: mongoose.Types.ObjectId(),
+                    name: "John Smith",
+                    phone: "9051234567"
+                },
+                movie: {
+                    _id: mongoose.Types.ObjectId(),
+                    title: "Movie title",
+                    genre: {
+                        name: "Genre name"
+                    },
+                    numberInStock: 2,
+                    dailyRentalValue: 2
+                }
+            });
+            customerId = rental.customer._id;
+            movieId = rental.movie._id;
+            let todaysDate = new Date();
+            rental.dateOut = new Date();
+            rental.dateOut.setDate(rental.dateOut.getDate() - 7);
+            await rental.save();
+            const res = await exec();
+            expect(res.body.rentalFee).toBe(14);
         });
 
         it('should return 200 if valid customerId and movieId passed', async () => {
