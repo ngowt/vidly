@@ -2,6 +2,7 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const User = require('../../../models/user');
 const Rental = require('../../../models/rental');
+const Movie = require('../../../models/movie');
 
 describe('/api/returns', () => {
     beforeEach( () => { 
@@ -9,6 +10,7 @@ describe('/api/returns', () => {
     });
     afterEach( async () => { 
         await Rental.remove({});
+        await Movie.remove({});
         await server.close();
     });
 
@@ -30,12 +32,25 @@ describe('/api/returns', () => {
                     dailyRentalValue: 5
                 }
             });
-            await rental.save();
             customerId = rental.customer._id;
             movieId = rental.movie._id;
+            movie = new Movie({
+                _id: movieId,
+                title: "Movie title",
+                genre: {
+                    name: "Genre name"
+                },
+                numberInStock: 5,
+                dailyRentalValue: 5
+            });
+            await rental.save();
+            await movie.save();
+            
+            
         });
 
         let rental;
+        let movie;
         let customerId;
         let movieId;
         
@@ -63,6 +78,14 @@ describe('/api/returns', () => {
             expect(diff).toBeLessThan(10 * 1000);
         });
 
+        it('should update the movie stock return is successful', async () => {
+            customerId = rental.customer._id;
+            movieId = rental.movie._id;
+            const res = await exec();
+            const movieInDb = await Movie.findById(movieId);
+            expect(movieInDb.numberInStock).toBe(movie.numberInStock + 1);
+        });
+        
         it('should set the rental fee if input is valid', async () => {
             rental = new Rental({
                 customer: {
@@ -82,7 +105,6 @@ describe('/api/returns', () => {
             });
             customerId = rental.customer._id;
             movieId = rental.movie._id;
-            let todaysDate = new Date();
             rental.dateOut = new Date();
             rental.dateOut.setDate(rental.dateOut.getDate() - 7);
             await rental.save();
