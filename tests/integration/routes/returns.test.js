@@ -55,6 +55,15 @@ describe('/api/returns', () => {
             expect(res).not.toBeNull();
         });
 
+        it('should set the returnDate if input is valid', async () => {
+            customerId = rental.customer._id;
+            movieId = rental.movie._id;
+            const res = await exec();
+            const rentalInDb = await Rental.findById(rental._id);
+            const diff = new Date() - rentalInDb.dateReturned;
+            expect(diff).toBeLessThan(10 * 1000);
+        });
+
         it('should return 200 if valid customerId and movieId passed', async () => {
             customerId = rental.customer._id;
             movieId = rental.movie._id;
