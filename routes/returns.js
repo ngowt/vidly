@@ -1,12 +1,14 @@
 const mongoose = require('mongoose');
 const express = require('express');
+const Joi = require('joi');
 const asyncMiddleware = require('../middleware/async');
 const auth = require('../middleware/auth');
+const validate = require('../middleware/validate');
 const Rental = require('../models/rental');
 const Movie = require('../models/movie');
 const router = express.Router();
 
-router.post('/', auth, asyncMiddleware(insertReturn));
+router.post('/', [auth, validate(validateReturn)], asyncMiddleware(insertReturn));
 
 async function insertReturn(req, res) {
     if (!req.body.customerId) return res.status(400).send('Invalid customerId');
@@ -28,4 +30,13 @@ async function insertReturn(req, res) {
     return res.status(200).send(result);
 }
 
+function validateReturn(req) {
+    const schema = {
+        customerId: Joi.objectId().required(),
+        movieId: Joi.objectId().required()
+    };
+    return Joi.validate(req, schema);
+}
+
 module.exports = router;
+
