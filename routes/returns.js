@@ -16,15 +16,12 @@ async function insertReturn(req, res) {
     const result = await Rental.lookup(req.body.customerId, req.body.movieId);
     if (!result) return res.status(404).send('Rental does not exist');
     if (result.dateReturned || result.rentalFee) return res.status(400).send('Rental has already been processed');
-    result.dateReturned = Date.now();
-    result.rentalFee = new Date(result.dateReturned - result.dateOut).getDate() * result.movie.dailyRentalValue;
+    result.return();
     await result.save();
-
     await Movie.updateOne({ _id: result.movie._id }, {
         $inc: { numberInStock: 1 }
     });
-    
-    return res.status(200).send(result);
+    return res.send(result);
 }
 
 function validateReturn(req) {
